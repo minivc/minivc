@@ -23,22 +23,6 @@
  * THE SOFTWARE.
  */
 
-// Register autoload function
-spl_autoload_register(function ($classname) {
-	$filename = str_replace('\\', DIRECTORY_SEPARATOR, $classname) . '.php';
-	//if (file_exists($filename))
-		require $filename;
-});
-
-class Router extends ArrayObject
-{
-	public function append($values)
-	{
-		foreach ($values as $key => $value)
-			$this[$key] = $value;
-	}
-}
-
 class Dispatcher
 {
 	private $path;
@@ -50,6 +34,7 @@ class Dispatcher
 		$uri = substr($_SERVER['REQUEST_URI'], $cut);
 
 		$this->path   = trim(strtok($uri, '?'), '/');
+		//$this->path   = trim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
 		$this->routes = $routes;
 	}
 
@@ -93,74 +78,5 @@ class Dispatcher
 			$controller_action,
 			$params
 		);
-	}
-}
-
-class Controller
-{
-	protected $params;
-
-	public static function dispatch($class, $action, $params)
-	{
-		$controller = new $class();
-		$controller->params = (object) $params;
-		$controller->initialize();
-		$controller->$action();
-	}
-
-	public function __construct()
-	{
-		// Nothing to do
-	}
-
-	public function initialize()
-	{
-		// Nothing to do
-	}
-
-	function render($name, $data = NULL)
-	{
-		header("Cache-Control: s-maxage=900, max-age=0");
-		$view = new View($name);
-		$view->render($data);
-	}
-
-	public function redirect($url)
-	{
-		header("Location: $url");
-		die;
-	}
-}
-
-class View
-{
-	private $name;
-
-	public function __construct($name)
-	{
-		$this->name = $name;
-	}
-
-	private static $settings = [];
-
-	public static function setup($settings)
-	{
-		static::$settings = $settings;
-	}
-
-	public function render($params = NULL)
-	{
-		if (array_key_exists('globals', static::$settings))
-			extract(static::$settings['globals']);
-
-		if ($params !== NULL)
-			extract($params, EXTR_OVERWRITE);
-
-		$base_path = isset(static::$settings['base_path']) ?
-			static::$settings['base_path'] : 'application/views';
-
-		$viewname = $this->name;
-
-		require  "$base_path/$this->name.phtml";
 	}
 }
