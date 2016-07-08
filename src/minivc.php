@@ -46,7 +46,10 @@ class Dispatcher
 
 	public function __construct($routes = array())
 	{
-		$this->path   = trim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
+		$cut = strlen(dirname($_SERVER['SCRIPT_NAME']));
+		$uri = substr($_SERVER['REQUEST_URI'], $cut);
+
+		$this->path   = trim(strtok($uri, '?'), '/');
 		$this->routes = $routes;
 	}
 
